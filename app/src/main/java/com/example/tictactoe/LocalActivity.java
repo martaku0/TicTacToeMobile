@@ -48,9 +48,9 @@ public class LocalActivity extends MainActivity {
         Bundle extras = getIntent().getExtras();
         withComputer = (Boolean) extras.get("WITH_COMP");
 
-        final TextView[] squares = {square01, square02, square03, square11, square12, square13, square21, square22, square23};
+        TextView[] squares = {square01, square02, square03, square11, square12, square13, square21, square22, square23};
 
-        for (final TextView square : squares) {
+        for (TextView square : squares) {
             square.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
