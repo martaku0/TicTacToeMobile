@@ -40,14 +40,14 @@
         android:layout_gravity="center"
         android:layout_marginTop="30dp"/>
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="ONLINE"
-        android:id="@+id/onlineBtn"
-        android:textSize="72dp"
-        android:layout_gravity="center"
-        android:layout_margin="20dp"/>
+<!--    <Button-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="ONLINE"-->
+<!--        android:id="@+id/onlineBtn"-->
+<!--        android:textSize="72dp"-->
+<!--        android:layout_gravity="center"-->
+<!--        android:layout_margin="20dp"/>-->
 
     <Button
         android:layout_width="match_parent"
@@ -55,6 +55,15 @@
         android:text="LOCAL"
         android:id="@+id/localBtn"
         android:textSize="72dp"
+        android:layout_gravity="center"
+        android:layout_margin="20dp"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="COMPUTER"
+        android:id="@+id/computerBtn"
+        android:textSize="60dp"
         android:layout_gravity="center"
         android:layout_margin="20dp"/>
 

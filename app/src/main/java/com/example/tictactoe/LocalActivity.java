@@ -6,7 +6,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-public class LocalActivity extends MainActivity{
+import org.w3c.dom.Text;
+
+import java.util.Arrays;
+
+public class LocalActivity extends MainActivity {
 
     private TextView playerText;
     private TextView square01;
@@ -41,17 +45,22 @@ public class LocalActivity extends MainActivity{
         currPlayer = "1";
         currChar = "O";
 
-        final TextView[] squares = { square01, square02, square03 ,square11,square12,square13, square21,square22, square23};
+        Bundle extras = getIntent().getExtras();
+        withComputer = (Boolean) extras.get("WITH_COMP");
+
+        final TextView[] squares = {square01, square02, square03, square11, square12, square13, square21, square22, square23};
 
         for (final TextView square : squares) {
             square.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(square.getText() == ""){
-                        if(playerText.getText().toString().contains("turn")){
+                    if (square.getText() == "") {
+                        if (playerText.getText().toString().contains("turn")) {
                             square.setText(currChar);
-                            changePlayer();
                             checkWinner();
+                            if (playerText.getText().toString().contains("turn")){
+                                changePlayer();
+                            }
                         }
                     }
                 }
@@ -59,21 +68,26 @@ public class LocalActivity extends MainActivity{
         }
     }
 
-    private void changePlayer(){
-        if(currPlayer == "1"){
+    private void changePlayer() {
+        if (currPlayer == "1") {
             currPlayer = "2";
             currChar = "X";
-        }
-        else{
+            Log.i("withComp", String.valueOf(withComputer));
+            if (withComputer) {
+                compTurn();
+            }
+        } else {
             currPlayer = "1";
             currChar = "O";
         }
 
-        playerText.setText("Player " + currPlayer + " turn");
+        if (playerText.getText().toString().contains("turn")){
+            playerText.setText("Player " + currPlayer + " turn");
+        }
     }
 
-    private void checkWinner(){
-        final TextView[] squares = { square01, square02, square03 ,square11,square12,square13, square21,square22, square23};
+    private void checkWinner() {
+        final TextView[] squares = {square01, square02, square03, square11, square12, square13, square21, square22, square23};
         playerText = findViewById(R.id.playerText);
 
         int[][] winCombinations = {
@@ -92,11 +106,10 @@ public class LocalActivity extends MainActivity{
                 squares[combo[1]].setBackgroundColor(Color.parseColor("#00FF00"));
                 squares[combo[2]].setBackgroundColor(Color.parseColor("#00FF00"));
 
-                if(symbol1 == "O"){
+                if (symbol1 == "O") {
                     playerText.setText("Player 1 won!");
                     return;
-                }
-                else{
+                } else {
                     playerText.setText("Player 2 won!");
                     return;
                 }
@@ -111,4 +124,321 @@ public class LocalActivity extends MainActivity{
 
         playerText.setText("Tie!");
     }
+
+    private void compTurn(){
+        if (playerText.getText().toString().contains("turn")) {
+            TextView square = think();
+            square.setText(currChar);
+            checkWinner();
+            if (playerText.getText().toString().contains("turn")){
+                changePlayer();
+            }
+        }
+    }
+
+    private TextView think() {
+
+        TextView[] squares = {square01, square02, square03, square11, square12, square13, square21, square22, square23};
+
+        for (int i = 0; i < 9; i += 3) {
+            if (squares[i].getText().equals("X") && squares[i+1].getText().equals("X") && squares[i + 2].getText()
+                    .equals("")) {
+                return squares[i + 2];
+            }
+            if (squares[i + 1].getText()
+                    .equals("X") && squares[i + 2].getText()
+                    .equals("X") && squares[i].getText()
+                    .equals("")) {
+                return squares[i];
+            }
+            if (squares[i].getText()
+                    .equals("X") && squares[i + 2].getText()
+                    .equals("X") && squares[i + 1].getText()
+                    .equals("")) {
+                return squares[i + 1];
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            if (squares[i].getText()
+                    .equals("X") && squares[i + 3].getText()
+                    .equals("X") && squares[i + 6].getText()
+                    .equals("")) {
+                return squares[i + 6];
+            }
+            if (squares[i + 3].getText()
+                    .equals("X") && squares[i + 6].getText()
+                    .equals("X") && squares[i].getText()
+                    .equals("")) {
+                return squares[i];
+            }
+            if (squares[i].getText()
+                    .equals("X") && squares[i + 6].getText()
+                    .equals("X") && squares[i + 3].getText()
+                    .equals("")) {
+                return squares[i + 3];
+            }
+        }
+        if (squares[0].getText()
+                .equals("X") && squares[4].getText()
+                .equals("X") && squares[8].getText()
+                .equals("")) {
+            return squares[8];
+        }
+        if (squares[4].getText()
+                .equals("X") && squares[8].getText()
+                .equals("X") && squares[0].getText()
+                .equals("")) {
+            return squares[0];
+        }
+        if (squares[8].getText()
+                .equals("X") && squares[0].getText()
+                .equals("X") && squares[4].getText()
+                .equals("")) {
+            return squares[4];
+        }
+        if (squares[2].getText()
+                .equals("X") && squares[4].getText()
+                .equals("X") && squares[6].getText()
+                .equals("")) {
+            return squares[6];
+        }
+        if (squares[4].getText()
+                .equals("X") && squares[6].getText()
+                .equals("X") && squares[2].getText()
+                .equals("")) {
+            return squares[2];
+        }
+        if (squares[6].getText()
+                .equals("X") && squares[2].getText()
+                .equals("X") && squares[4].getText()
+                .equals("")) {
+            return squares[4];
+        }
+        for (int i = 0; i < 9; i += 3) {
+            if (squares[i].getText()
+                    .equals("O") && squares[i + 1].getText()
+                    .equals("O") && squares[i + 2].getText()
+                    .equals("")) {
+                return squares[i + 2];
+            }
+            if (squares[i + 1].getText()
+                    .equals("O") && squares[i + 2].getText()
+                    .equals("O") && squares[i].getText()
+                    .equals("")) {
+                return squares[i];
+            }
+            if (squares[i].getText()
+                    .equals("O") && squares[i + 2].getText()
+                    .equals("O") && squares[i + 1].getText()
+                    .equals("")) {
+                return squares[i + 1];
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            if (squares[i].getText()
+                    .equals("O") && squares[i + 3].getText()
+                    .equals("O") && squares[i + 6].getText()
+                    .equals("")) {
+                return squares[i + 6];
+            }
+            if (squares[i + 3].getText()
+                    .equals("O") && squares[i + 6].getText()
+                    .equals("O") && squares[i].getText()
+                    .equals("")) {
+                return squares[i];
+            }
+            if (squares[i].getText()
+                    .equals("O") && squares[i + 6].getText()
+                    .equals("O") && squares[i + 3].getText()
+                    .equals("")) {
+                return squares[i + 3];
+            }
+        }
+        if (squares[4].getText()
+                .equals("O") && squares[8].getText()
+                .equals("O") && squares[0].getText()
+                .equals("")) {
+            return squares[0];
+        }
+        if (squares[8].getText()
+                .equals("O") && squares[0].getText()
+                .equals("O") && squares[4].getText()
+                .equals("")) {
+            return squares[4];
+        }
+        if (squares[2].getText()
+                .equals("O") && squares[4].getText()
+                .equals("O") && squares[6].getText()
+                .equals("")) {
+            return squares[6];
+        }
+        if (squares[4].getText()
+                .equals("O") && squares[6].getText()
+                .equals("O") && squares[2].getText()
+                .equals("")) {
+            return squares[2];
+        }
+        if (squares[6].getText()
+                .equals("O") && squares[2].getText()
+                .equals("O") && squares[4].getText()
+                .equals("")) {
+            return squares[4];
+        }
+        if (squares[4].getText()
+                .equals("")) {
+            return squares[4];
+        }
+        if ((squares[0].getText()
+                .equals("O") && squares[8].getText()
+                .equals("O")) || (squares[2].getText()
+                .equals("O") && squares[6].getText()
+                .equals("O"))) {
+            for (int i = 1; i < 8; i += 2) {
+                if (squares[i].getText()
+                        .equals("")) {
+                    return squares[i];
+                }
+            }
+        }
+        if (squares[0].getText()
+                .equals("O") && squares[5].getText()
+                .equals("O") && squares[2].getText()
+                .equals("")) {
+            return squares[2];
+        }
+        if (squares[0].getText()
+                .equals("O") && squares[7].getText()
+                .equals("O") && squares[6].getText()
+                .equals("")) {
+            return squares[6];
+        }
+        if (squares[2].getText()
+                .equals("O") && squares[3].getText()
+                .equals("O") && squares[0].getText()
+                .equals("")) {
+            return squares[0];
+        }
+        if (squares[2].getText()
+                .equals("O") && squares[7].getText()
+                .equals("O") && squares[8].getText()
+                .equals("")) {
+            return squares[8];
+        }
+        if (squares[6].getText()
+                .equals("O") && squares[1].getText()
+                .equals("O") && squares[0].getText()
+                .equals("")) {
+            return squares[0];
+        }
+        if (squares[6].getText()
+                .equals("O") && squares[5].getText()
+                .equals("O") && squares[8].getText()
+                .equals("")) {
+            return squares[8];
+        }
+        if (squares[8].getText()
+                .equals("O") && squares[1].getText()
+                .equals("O") && squares[2].getText()
+                .equals("")) {
+            return squares[2];
+        }
+        if (squares[8].getText()
+                .equals("O") && squares[3].getText()
+                .equals("O") && squares[6].getText()
+                .equals("")) {
+            return squares[6];
+        }
+        if (squares[1].getText()
+                .equals("O") && squares[3].getText()
+                .equals("O") && squares[0].getText()
+                .equals("")) {
+            return squares[0];
+        }
+        if (squares[1].getText()
+                .equals("O") && squares[5].getText()
+                .equals("O") && squares[2].getText()
+                .equals("")) {
+            return squares[2];
+        }
+        if (squares[7].getText()
+                .equals("O") && squares[3].getText()
+                .equals("O") && squares[6].getText()
+                .equals("")) {
+            return squares[6];
+        }
+        if (squares[7].getText()
+                .equals("O") && squares[5].getText()
+                .equals("O") && squares[8].getText()
+                .equals("")) {
+            return squares[8];
+        }
+        if (squares[0].getText()
+                .equals("X") && squares[5].getText()
+                .equals("X") && squares[2].getText()
+                .equals("")) {
+            return squares[2];
+        }
+        if (squares[0].getText()
+                .equals("X") && squares[7].getText()
+                .equals("X") && squares[6].getText()
+                .equals("")) {
+            return squares[6];
+        }
+        if (squares[2].getText()
+                .equals("X") && squares[3].getText()
+                .equals("X") && squares[0].getText()
+                .equals("")) {
+            return squares[0];
+        }
+        if (squares[2].getText()
+                .equals("X") && squares[7].getText()
+                .equals("X") && squares[8].getText()
+                .equals("")) {
+            return squares[8];
+        }
+        if (squares[6].getText()
+                .equals("X") && squares[1].getText()
+                .equals("X") && squares[0].getText()
+                .equals("")) {
+            return squares[0];
+        }
+        if (squares[6].getText()
+                .equals("X") && squares[5].getText()
+                .equals("X") && squares[8].getText()
+                .equals("")) {
+            return squares[8];
+        }
+        if (squares[8].getText()
+                .equals("X") && squares[1].getText()
+                .equals("X") && squares[2].getText()
+                .equals("")) {
+            return squares[2];
+        }
+        if (squares[8].getText()
+                .equals("X") && squares[3].getText()
+                .equals("X") && squares[6].getText()
+                .equals("")) {
+            return squares[6];
+        }
+        if (squares[4].getText()
+                .equals("X")) {
+            for (int i = 0; i < 9; i++) {
+                if (squares[i].getText()
+                        .equals("") && squares[8 - i].getText()
+                        .equals("")) {
+                    return squares[8 - i];
+                }
+            }
+        }
+
+        for(int i = 0; i<9; i++){
+            if (squares[i].getText()
+                    .equals("")) {
+                return squares[i];
+            }
+        }
+
+        return null;
+    }
+
 }
