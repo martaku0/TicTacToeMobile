@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        onlineBtn = findViewById(R.id.onlineBtn);
+        onlineBtn = findViewById(R.id.onlineBtn);
         localBtn = findViewById(R.id.localBtn);
         computerBtn = findViewById(R.id.computerBtn);
 
@@ -43,6 +43,13 @@ public class MainActivity extends AppCompatActivity {
                 startComputer();
             }
         });
+
+        onlineBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startOnline();
+            }
+        });
     }
 
     private void startLocal(){
@@ -55,5 +62,11 @@ public class MainActivity extends AppCompatActivity {
         Intent localAct = new Intent(MainActivity.this, LocalActivity.class);
         localAct.putExtra("WITH_COMP", withComputer);
         startActivity(localAct);
+    }
+
+    private void startOnline(){
+        Intent onlineAct = new Intent(MainActivity.this, OnlineActivity.class);
+        onlineAct.putExtra("WITH_COMP", false);
+        startActivity(onlineAct);
     }
 }

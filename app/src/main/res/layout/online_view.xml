@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp"
+            app:title="Tic Tac Toe - online"
+            app:titleTextColor="@color/white">
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Player 1 turn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="64dp"
+        android:textAlignment="center"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:id="@+id/playerText"/>
+
+    <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="3"
+        android:padding="16dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square01"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"
+                />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square02"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square03"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square11"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square12"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square13"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square21"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square22"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- Obramowanie -->
+            <View
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@android:color/black"
+                android:layout_gravity="center"/>
+
+            <!-- Kwadrat -->
+            <TextView
+                android:id="@+id/square23"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@android:color/white"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textSize="72dp"/>
+        </FrameLayout>
+
+    </GridLayout>
+
+
+</LinearLayout>

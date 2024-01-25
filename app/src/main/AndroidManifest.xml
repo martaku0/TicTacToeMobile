@@ -22,6 +22,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".LocalActivity"></activity>
+        <activity android:name=".OnlineActivity"></activity>
     </application>
 
 </manifest>
