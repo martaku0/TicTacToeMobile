@@ -20,10 +20,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class OnlineActivity extends MainActivity {
 
     private TextView playerText;
+    private TextView counter;
     private TextView square01;
     private TextView square02;
     private TextView square03;
@@ -40,6 +43,10 @@ public class OnlineActivity extends MainActivity {
     private boolean withComputer;
 
     private DatabaseReference dbref;
+    private String game_user;
+    private String game_key;
+    private String game_enemy;
+    private boolean isgoing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +56,10 @@ public class OnlineActivity extends MainActivity {
         dbref = FirebaseDatabase.getInstance("https://tictactoe-tctcte-default-rtdb.europe-west1.firebasedatabase.app")
                 .getReference("tictactoe");
 
-//        DatabaseReference newChildRef = dbref.push();
-//
-//        String key = newChildRef.getKey();
-//
-//        dbref.child(key).setValue(null);
-
         setupDbListener();
 
         playerText = findViewById(R.id.playerText);
+        counter = findViewById(R.id.counter);
         square01 = findViewById(R.id.square01);
         square02 = findViewById(R.id.square02);
         square03 = findViewById(R.id.square03);
@@ -71,6 +73,9 @@ public class OnlineActivity extends MainActivity {
         currPlayer = "1";
         currChar = "O";
         withComputer = false;
+        isgoing = false;
+
+        game_enemy = "";
 
         TextView[] squares = {square01, square02, square03, square11, square12, square13, square21, square22, square23};
 
@@ -78,7 +83,7 @@ public class OnlineActivity extends MainActivity {
             square.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (square.getText() == "") {
+                    if (square.getText() == "" && isgoing) {
                         if (playerText.getText().toString().contains("turn")) {
                             square.setText(currChar);
                             checkWinner();
@@ -90,42 +95,85 @@ public class OnlineActivity extends MainActivity {
                 }
             });
         }
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                int counting = Integer.valueOf((String) counter.getText());
+                counting = counting - 1;
+
+                int finalCounting = counting;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        counter.setText(String.valueOf(finalCounting));
+
+                        if(game_enemy.equals("")) {
+                            if (finalCounting == 0) {
+                                counter.setText("Play with computer");
+                                withComputer = true;
+                                isgoing = true;
+
+                                timer.cancel();
+                            }
+                        }
+                        else{
+                            timer.cancel();
+                            counter.setText("Online playing");
+                        }
+                    }
+                });
+            }
+        }, 0, 1000);
+
+
     }
 
     private void setupDbListener(){
         dbref.addListenerForSingleValueEvent (new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.i("test", "onDataChange: ");
+                long list_len = dataSnapshot.getChildrenCount();
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                     String key = childSnapshot.getKey();
                     List<String> value = (List<String>) childSnapshot.getValue();
-                    //TODO: check
                     if (key != null) {
                         if (value != null && value.size() < 2) {
                             DatabaseReference newChildRef = dbref.push();
                             String user = newChildRef.getKey();
+                            game_user = user;
                             List<String> users = new ArrayList<>(value);
                             users.add(user);
                             dbref.child(key).setValue(users);
+                            game_key = key;
+                            break;
                         }
                         else{
-                            DatabaseReference newChildRef = dbref.push();
-                            String user = newChildRef.getKey();
-                            List<String> users = new ArrayList<>(value);
-                            users.add(user);
-                            dbref.child(String.valueOf(Integer.valueOf(key)+1)).setValue(users);
+                            if(key.equals(String.valueOf(list_len))){
+                                DatabaseReference newChildRef = dbref.push();
+                                String user = newChildRef.getKey();
+                                game_user = user;
+                                List<String> users = new ArrayList<>();
+                                users.add(user);
+                                dbref.child(String.valueOf(Integer.valueOf(key)+1)).setValue(users);
+                                game_key = String.valueOf(Integer.valueOf(key)+1);
+                                break;
+                            }
+                            else{
+                                Log.d("FirebaseData", "We got a problem here");
+                                break;
+                            }
                         }
 
-                        Log.d("FirebaseData", "Key: " + key + ", Value: " + value);
-
-                        break;
                     } else {
                         DatabaseReference newChildRef = dbref.push();
                         String user = newChildRef.getKey();
+                        game_user = user;
                         List<String> users = new ArrayList<>();
                         users.add(user);
                         dbref.child("1").setValue(users);
+                        game_key = "1";
                         break;
                     }
                 }
@@ -133,9 +181,41 @@ public class OnlineActivity extends MainActivity {
                 if(dataSnapshot.getChildrenCount() == 0){
                     DatabaseReference newChildRef = dbref.push();
                     String user = newChildRef.getKey();
+                    game_user = user;
                     List<String> users = new ArrayList<>();
                     users.add(user);
                     dbref.child("1").setValue(users);
+                    game_key = "1";
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseData", "Error: " + error.getMessage());
+            }
+        });
+
+        waitForPlayer();
+    }
+
+    private void waitForPlayer(){
+        dbref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    String key = childSnapshot.getKey();
+                    List<String> value = (List<String>) childSnapshot.getValue();
+                    if(key.equals(game_key)){
+                        if(value.size() == 2){
+                            for (String v: value) {
+                                if(!v.equals(game_user)){
+                                    game_enemy = v;
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    }
                 }
             }
 
