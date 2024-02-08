@@ -1,11 +1,16 @@
 package com.example.tictactoe;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.media.metrics.LogSessionId;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 
@@ -24,7 +29,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class OnlineActivity extends MainActivity {
-
+    // TODO: handle no enemy situation ?
+    // TODO: revange ?
     private TextView playerText;
     private TextView counter;
     private TextView square01;
@@ -43,18 +49,30 @@ public class OnlineActivity extends MainActivity {
     private boolean withComputer;
 
     private DatabaseReference dbref;
+    private DatabaseReference dbref2;
     private String game_user;
     private String game_key;
     private String game_enemy;
+    private String game_user_id;
     private boolean isgoing;
+    private boolean game_online_going;
+
+    private String url = "https://tictactoe-tctcte-default-rtdb.europe-west1.firebasedatabase.app/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.online_view);
 
-        dbref = FirebaseDatabase.getInstance("https://tictactoe-tctcte-default-rtdb.europe-west1.firebasedatabase.app")
-                .getReference("tictactoe");
+        dbref = FirebaseDatabase.getInstance(url)
+                .getReference("data");
+
+        dbref2 = FirebaseDatabase.getInstance(url)
+                .getReference("moves");
+
+        List<String> a = Arrays.asList("Hello", "World");
+
+        dbref.child("1").setValue(a);
 
         setupDbListener();
 
@@ -74,22 +92,32 @@ public class OnlineActivity extends MainActivity {
         currChar = "O";
         withComputer = false;
         isgoing = false;
-
+        game_online_going = false;
+        game_key = "";
         game_enemy = "";
+        game_user_id = "";
 
         TextView[] squares = {square01, square02, square03, square11, square12, square13, square21, square22, square23};
 
-        for (TextView square : squares) {
+        for (int i = 0; i < squares.length; i++) {
+            TextView square = squares[i];
+            int finalI = i;
             square.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (square.getText() == "" && isgoing) {
+                    if (square.getText().toString().equals("") && isgoing) {
                         if (playerText.getText().toString().contains("turn")) {
                             square.setText(currChar);
                             checkWinner();
                             if (playerText.getText().toString().contains("turn")){
                                 changePlayer();
                             }
+                        }
+                    }
+                    else if(square.getText().toString().equals("") && game_online_going){
+                        int id_player = Integer.parseInt(game_user_id)+1;
+                        if (playerText.getText().toString().contains("turn") && playerText.getText().toString().contains(String.valueOf(id_player))) {
+                            dbref2.child(game_key).setValue(currChar + String.valueOf(finalI));
                         }
                     }
                 }
@@ -114,59 +142,168 @@ public class OnlineActivity extends MainActivity {
                                 counter.setText("Play with computer");
                                 withComputer = true;
                                 isgoing = true;
-
+                                dbref.child(game_key).removeValue();
+                                dbref2.child(game_key).removeValue();
                                 timer.cancel();
                             }
                         }
                         else{
                             timer.cancel();
-                            counter.setText("Online playing");
+                            counter.setTextSize(20);
+                            counter.setText("You are Player " + String.valueOf(Integer.valueOf(game_user_id)+1));
+                            game_online_going = true;
                         }
                     }
                 });
             }
         }, 0, 1000);
 
+        Timer timer2 = new Timer();
+        timer2.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!game_key.equals("")){
+                            dbref.child(game_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if(dataSnapshot.exists()){
+                                        if(dataSnapshot.getValue() != null){
+                                            List<String> value = (List<String>) dataSnapshot.getValue();
+                                            if(!game_enemy.equals("") && value.size() < 2){
+                                                displayAlert();
+                                                timer2.cancel();
+                                            }
+                                        }
+                                    }
+                                }
 
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Log.e("ERROR", "enemy checker error");
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        }, 0, 1000);
+    }
+
+    private void revange(){
+        if (!isFinishing()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Revange");
+            builder.setMessage("Do you want a revange with this player?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                    dbref2.child(game_key).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            Object value = snapshot.getValue();
+                            if(value != null){
+                                String v = value.toString();
+                                if(v.equals("revange")){
+                                    dbref2.child(game_key).setValue("start");
+                                }
+                                else{
+                                    dbref2.child(game_key).setValue("revange");
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("REVANGE-DATABASE","Database error");
+                        }
+                    });
+                }
+            });
+
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                    backToMainMenu();
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+    }
+
+    private void displayAlert() {
+        if (!isFinishing()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("No enemy");
+            builder.setMessage("Your enemy is not here anymore.");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                    dbref.child(game_key).removeValue();
+                    dbref2.child(game_key).removeValue();
+                    backToMainMenu();
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
     }
 
     private void setupDbListener(){
-        dbref.addListenerForSingleValueEvent (new ValueEventListener() {
+        dbref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                long list_len = dataSnapshot.getChildrenCount();
-                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    String key = childSnapshot.getKey();
-                    List<String> value = (List<String>) childSnapshot.getValue();
-                    if (key != null) {
-                        if (value != null && value.size() < 2) {
-                            DatabaseReference newChildRef = dbref.push();
-                            String user = newChildRef.getKey();
-                            game_user = user;
-                            List<String> users = new ArrayList<>(value);
-                            users.add(user);
-                            dbref.child(key).setValue(users);
-                            game_key = key;
-                            break;
-                        }
-                        else{
-                            if(key.equals(String.valueOf(list_len))){
+                if(dataSnapshot.exists()) {
+                    long list_len = dataSnapshot.getChildrenCount();
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        String key = childSnapshot.getKey();
+                        List<String> value = (List<String>) childSnapshot.getValue();
+                        if (key != null) {
+                            if (value != null && value.size() < 2) {
                                 DatabaseReference newChildRef = dbref.push();
                                 String user = newChildRef.getKey();
                                 game_user = user;
-                                List<String> users = new ArrayList<>();
+                                List<String> users = new ArrayList<>(value);
                                 users.add(user);
-                                dbref.child(String.valueOf(Integer.valueOf(key)+1)).setValue(users);
-                                game_key = String.valueOf(Integer.valueOf(key)+1);
+                                dbref.child(key).setValue(users);
+                                game_key = key;
                                 break;
+                            } else {
+                                if (key.equals(String.valueOf(list_len))) {
+                                    DatabaseReference newChildRef = dbref.push();
+                                    String user = newChildRef.getKey();
+                                    game_user = user;
+                                    List<String> users = new ArrayList<>();
+                                    users.add(user);
+                                    dbref.child(String.valueOf(Integer.valueOf(key) + 1)).setValue(users);
+                                    game_key = String.valueOf(Integer.valueOf(key) + 1);
+                                    break;
+                                } else {
+                                    continue;
+                                }
                             }
-                            else{
-                                Log.d("FirebaseData", "We got a problem here");
-                                break;
-                            }
-                        }
 
-                    } else {
+                        } else {
+                            DatabaseReference newChildRef = dbref.push();
+                            String user = newChildRef.getKey();
+                            game_user = user;
+                            List<String> users = new ArrayList<>();
+                            users.add(user);
+                            dbref.child("1").setValue(users);
+                            game_key = "1";
+                            break;
+                        }
+                    }
+
+                    if (dataSnapshot.getChildrenCount() == 0) {
                         DatabaseReference newChildRef = dbref.push();
                         String user = newChildRef.getKey();
                         game_user = user;
@@ -174,18 +311,9 @@ public class OnlineActivity extends MainActivity {
                         users.add(user);
                         dbref.child("1").setValue(users);
                         game_key = "1";
-                        break;
                     }
-                }
 
-                if(dataSnapshot.getChildrenCount() == 0){
-                    DatabaseReference newChildRef = dbref.push();
-                    String user = newChildRef.getKey();
-                    game_user = user;
-                    List<String> users = new ArrayList<>();
-                    users.add(user);
-                    dbref.child("1").setValue(users);
-                    game_key = "1";
+                    waitForPlayer();
                 }
             }
 
@@ -195,7 +323,7 @@ public class OnlineActivity extends MainActivity {
             }
         });
 
-        waitForPlayer();
+
     }
 
     private void waitForPlayer(){
@@ -203,18 +331,28 @@ public class OnlineActivity extends MainActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                    String key = childSnapshot.getKey();
-                    List<String> value = (List<String>) childSnapshot.getValue();
-                    if(key.equals(game_key)){
-                        if(value.size() == 2){
-                            for (String v: value) {
-                                if(!v.equals(game_user)){
-                                    game_enemy = v;
-                                    break;
+                    if(childSnapshot.getValue() != null && childSnapshot.getKey() != null) {
+                        String key = childSnapshot.getKey();
+                        List<String> value = (List<String>) childSnapshot.getValue();
+                        if (key.equals(game_key)) {
+                            if (value.size() == 2) {
+                                for (String v : value) {
+                                    if (!v.equals(game_user)) {
+                                        game_enemy = v;
+                                        if (game_user_id.equals("")) {
+                                            game_user_id = "1";
+                                        }
+                                        setupDbListenerMoves();
+                                        break;
+                                    }
+                                }
+                            } else if (value.size() == 1) {
+                                if (game_user_id.equals("")) {
+                                    game_user_id = "0";
                                 }
                             }
+                            break;
                         }
-                        break;
                     }
                 }
             }
@@ -226,12 +364,10 @@ public class OnlineActivity extends MainActivity {
         });
     }
 
-
     private void changePlayer() {
-        if (currPlayer == "1") {
+        if (currPlayer.equals("1")) {
             currPlayer = "2";
             currChar = "X";
-            Log.i("withComp", String.valueOf(withComputer));
             if (withComputer) {
                 compTurn();
             }
@@ -265,11 +401,13 @@ public class OnlineActivity extends MainActivity {
                 squares[combo[1]].setBackgroundColor(Color.parseColor("#00FF00"));
                 squares[combo[2]].setBackgroundColor(Color.parseColor("#00FF00"));
 
-                if (symbol1 == "O") {
+                if (symbol1.equals("O")) {
                     playerText.setText("Player 1 won!");
+                    revange();
                     return;
                 } else {
                     playerText.setText("Player 2 won!");
+                    revange();
                     return;
                 }
             }
@@ -282,6 +420,7 @@ public class OnlineActivity extends MainActivity {
         }
 
         playerText.setText("Tie!");
+        revange();
     }
 
     private void compTurn(){
@@ -600,4 +739,89 @@ public class OnlineActivity extends MainActivity {
         return null;
     }
 
+    @Override
+    protected void onDestroy() {
+        dbref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // usuwanie gracza gdy wyjdzie
+                for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                    String key = childSnapshot.getKey();
+                    List<String> value = (List<String>) childSnapshot.getValue();
+                    if(key.equals(game_key)){
+                        if(value.size() > 0){
+                            for (String v: value) {
+                                if(v.equals(game_user)){
+                                    if(game_user_id.equals("0")){
+                                        dbref.child(game_key).child("0").removeValue();
+                                        break;
+                                    }
+                                    else if(game_user_id.equals("1")){
+                                        dbref.child(game_key).child("1").removeValue();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseData", "Error: " + error.getMessage());
+            }
+        });
+        super.onDestroy();
+    }
+
+    private void backToMainMenu(){
+        Intent mainAct = new Intent(OnlineActivity.this, MainActivity.class);
+        startActivity(mainAct);
+    }
+
+    private void setupDbListenerMoves(){
+        TextView[] squares = {square01, square02, square03, square11, square12, square13, square21, square22, square23};
+
+        dbref2.child(game_key).setValue("start");
+
+        dbref2.child(game_key).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()) {
+                    Object value = dataSnapshot.getValue();
+                    if(value != null) {
+                        if (value.toString().contains("O") || value.toString().contains("X")) {
+                            String v = value.toString();
+                            String c = String.valueOf(v.charAt(0));
+                            int n = v.charAt(1) - '0';
+                            if (squares[n].getText().toString().equals("") && game_online_going) {
+                                squares[n].setText(c);
+                                checkWinner();
+                                if (playerText.getText().toString().contains("turn")) {
+                                    changePlayer();
+                                }
+                            }
+                        }
+                        else if(value.toString().contains("start")){
+                            for (int i = 0; i < squares.length; i++) {
+                                TextView square = squares[i];
+                                square.setBackgroundColor(Color.WHITE);
+                                square.setText("");
+                                game_online_going = true;
+                                playerText.setText("Player 1 turn");
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("ERROR","Moves database error.");
+
+            }
+        });
+    }
 }
