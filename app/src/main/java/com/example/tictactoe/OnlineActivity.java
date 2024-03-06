@@ -29,8 +29,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class OnlineActivity extends MainActivity {
-    // TODO: handle no enemy situation ?
-    // TODO: revange ?
     private TextView playerText;
     private TextView counter;
     private TextView square01;
@@ -106,8 +104,16 @@ public class OnlineActivity extends MainActivity {
                 @Override
                 public void onClick(View v) {
                     if (square.getText().toString().equals("") && isgoing) {
+                        Log.d("TAG", "onClick: ");
+
                         if (playerText.getText().toString().contains("turn")) {
                             square.setText(currChar);
+                            if(currChar.equals("O")){
+                                square.setTextColor(Color.BLUE);
+                            }
+                            else{
+                                square.setTextColor(Color.RED);
+                            }
                             checkWinner();
                             if (playerText.getText().toString().contains("turn")){
                                 changePlayer();
@@ -115,9 +121,18 @@ public class OnlineActivity extends MainActivity {
                         }
                     }
                     else if(square.getText().toString().equals("") && game_online_going){
+                        Log.d("TAG", "aaaa: ");
+
                         int id_player = Integer.parseInt(game_user_id)+1;
                         if (playerText.getText().toString().contains("turn") && playerText.getText().toString().contains(String.valueOf(id_player))) {
                             dbref2.child(game_key).setValue(currChar + String.valueOf(finalI));
+                        }
+
+                        if(square.getText().toString().equals("O")){
+                            square.setTextColor(Color.BLUE);
+                        }
+                        else{
+                            square.setTextColor(Color.RED);
                         }
                     }
                 }
@@ -228,6 +243,7 @@ public class OnlineActivity extends MainActivity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
+                    onDestroy();
                     backToMainMenu();
                 }
             });
@@ -427,6 +443,12 @@ public class OnlineActivity extends MainActivity {
         if (playerText.getText().toString().contains("turn")) {
             TextView square = think();
             square.setText(currChar);
+            if(currChar.equals("O")){
+                square.setTextColor(Color.BLUE);
+            }
+            else{
+                square.setTextColor(Color.RED);
+            }
             checkWinner();
             if (playerText.getText().toString().contains("turn")){
                 changePlayer();
@@ -798,6 +820,12 @@ public class OnlineActivity extends MainActivity {
                             int n = v.charAt(1) - '0';
                             if (squares[n].getText().toString().equals("") && game_online_going) {
                                 squares[n].setText(c);
+                                if(squares[n].getText().toString().equals("O")){
+                                    squares[n].setTextColor(Color.BLUE);
+                                }
+                                else{
+                                    squares[n].setTextColor(Color.RED);
+                                }
                                 checkWinner();
                                 if (playerText.getText().toString().contains("turn")) {
                                     changePlayer();

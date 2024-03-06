@@ -57,6 +57,12 @@ public class LocalActivity extends MainActivity {
                     if (square.getText() == "") {
                         if (playerText.getText().toString().contains("turn")) {
                             square.setText(currChar);
+                            if(currChar.equals("O")){
+                                square.setTextColor(Color.BLUE);
+                            }
+                            else{
+                                square.setTextColor(Color.RED);
+                            }
                             checkWinner();
                             if (playerText.getText().toString().contains("turn")){
                                 changePlayer();
@@ -129,6 +135,12 @@ public class LocalActivity extends MainActivity {
         if (playerText.getText().toString().contains("turn")) {
             TextView square = think();
             square.setText(currChar);
+            if(currChar.equals("O")){
+                square.setTextColor(Color.BLUE);
+            }
+            else{
+                square.setTextColor(Color.RED);
+            }
             checkWinner();
             if (playerText.getText().toString().contains("turn")){
                 changePlayer();
